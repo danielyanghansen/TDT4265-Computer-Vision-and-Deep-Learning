@@ -95,6 +95,10 @@ class BinaryModel:
         # You can note that the difference between the target (y) and the output (\hat{y}) is the error of the model
         # The error is then multiplied by the input to the model to get the gradient
         error = targets - outputs
+        print("Error: ", error)
+        print("X: ", X)
+        print("X.T: ", X.T)
+
         self.grad = -np.dot(X.T, error) # X is transposed to get the correct dimensions for the dot product, as the gradient is a matrix with dimensions 785 * 1
         
         assert (
@@ -104,8 +108,6 @@ class BinaryModel:
         assert (
             self.grad.shape == self.w.shape
         ), f"Grad shape: {self.grad.shape}, w: {self.w.shape}"
-
-        print("Gradient after: ", self.grad)
 
     def zero_grad(self) -> None:
         self.grad = None
