@@ -51,12 +51,11 @@ def cross_entropy_loss(targets: np.ndarray, outputs: np.ndarray) -> float:
     # where N is the batch size
     # ... or simply the mean of the cross entropy loss for each image in the batch
 
-    average_loss = np.mean(
-        - (targets * np.log(outputs) + (1 - targets) * np.log(1 - outputs)) # This expressien resolves in a matrix with dimensions batch size * 1
-        # The loss function is applied element-wise to the targets and outputs
-    )
-
+    losses = -(targets * np.log(outputs) + (1-targets) * np.log(1-outputs))
+    average_loss = np.sum(losses) / targets.shape[0]
+    
     return average_loss
+
 
 
 class BinaryModel:
@@ -75,13 +74,12 @@ class BinaryModel:
             y: output of model with shape [batch size, 1]
         """
         # DONE implement this function (Task 2a)
-        weights = self.w
-        # Compute the weighted sum of inputs
-        z = np.dot(X, weights)
-        # Apply the sigmoid activation function
-        y = 1 / (1 + np.exp(-z))
-        # Remember that e^z is 1 + z + z^2/2! + z^3/3! + ...
-        logger("y:", y)
+        def sigmoid_activation(x):
+            return 1/(1+ np.exp(-self.w.T.dot(x)))
+
+
+        y = np.apply_along_axis(sigmoid_activation, 1, X)
+
         return y
 
 
@@ -95,26 +93,19 @@ class BinaryModel:
         """
         # DONE implement this function (Task 2a)
 
-        logger("Gradient before: ", self.grad)
 
-        # Gradient = -(y^n - \hat{y}^n) * x_i^n where n signifies the n-th sample in the batch and i signifies the i-th node in the input layer
-        # You can note that the difference between the target (y) and the output (\hat{y}) is the error of the model
-        # The error is then multiplied by the input to the model to get the gradient
-        error = targets - outputs
-        logger("Error: ", error)
-        logger("X: ", X)
-        
-        self.grad = -np.dot(X.T, error)/ len(X) # X is transposed to get the correct dimensions for the dot product, as the gradient is a matrix with dimensions 785 * 1
-
-        logger("Gradient after: ", self.grad)
-        logger("Average Gradient:", np.mean(self.grad))
-        
         assert (
             targets.shape == outputs.shape
         ), f"Output shape: {outputs.shape}, targets: {targets.shape}"
+        self.grad = np.zeros_like(self.w)
         assert (
             self.grad.shape == self.w.shape
         ), f"Grad shape: {self.grad.shape}, w: {self.w.shape}"
+
+        error = targets - outputs
+        gradient = np.sum(-error * X, axis=0) / X.shape[0]
+
+        self.grad = gradient.reshape(self.grad.shape)
 
     def zero_grad(self) -> None:
         self.grad = None
