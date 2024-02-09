@@ -99,7 +99,7 @@ class BinaryModel:
         print("X: ", X)
         print("X.T: ", X.T)
 
-        self.grad = -np.dot(X.T, error) # X is transposed to get the correct dimensions for the dot product, as the gradient is a matrix with dimensions 785 * 1
+        self.grad = -np.dot(error, X.T) # X is transposed to get the correct dimensions for the dot product, as the gradient is a matrix with dimensions 785 * 1
         
         assert (
             targets.shape == outputs.shape
