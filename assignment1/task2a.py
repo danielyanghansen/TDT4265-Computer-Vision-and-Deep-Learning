@@ -57,7 +57,7 @@ class BinaryModel:
 
     def __init__(self):
         # Define number of input nodes
-        self.I = None
+        self.I = 785
         self.w = np.zeros((self.I, 1))
         self.grad = None
 
@@ -89,6 +89,8 @@ class BinaryModel:
         """
         # DONE implement this function (Task 2a)
 
+        print("Gradient before: ", self.grad)
+
         # Gradient = -(y^n - \hat{y}^n) * x_i^n where n signifies the n-th sample in the batch and i signifies the i-th node in the input layer
         # You can note that the difference between the target (y) and the output (\hat{y}) is the error of the model
         # The error is then multiplied by the input to the model to get the gradient
@@ -102,6 +104,8 @@ class BinaryModel:
         assert (
             self.grad.shape == self.w.shape
         ), f"Grad shape: {self.grad.shape}, w: {self.w.shape}"
+
+        print("Gradient after: ", self.grad)
 
     def zero_grad(self) -> None:
         self.grad = None
