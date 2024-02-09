@@ -15,17 +15,18 @@ def cross_entropy_loss(targets: np.ndarray, outputs: np.ndarray):
     # TODO implement this function (Task 3a)
     assert targets.shape == outputs.shape,\
         f"Targets shape: {targets.shape}, outputs: {outputs.shape}"
-    raise NotImplementedError
 
+
+    return -np.sum(targets * np.log(outputs)) / targets.shape[0]
 
 class SoftmaxModel:
 
     def __init__(self, l2_reg_lambda: float):
         # Define number of input nodes
-        self.I = None
+        self.I = 785
 
         # Define number of output nodes
-        self.num_outputs = None
+        self.num_outputs = 10
         self.w = np.zeros((self.I, self.num_outputs))
         self.grad = None
 
@@ -38,8 +39,16 @@ class SoftmaxModel:
         Returns:
             y: output of model with shape [batch size, num_outputs]
         """
-        # TODO implement this function (Task 3a)
-        return None
+        z_k = self.w.T.dot(X.T)
+
+        #Sigma e^{z_k} between k' and K 
+        sum_e_z_k = np.sum(np.exp(z_k), axis = 0)
+
+        y_k = np.exp(z_k)/sum_e_z_k
+
+        return y_k.T # Need to transpose
+        # DONE implement this function (Task 3a)
+
 
     def backward(self, X: np.ndarray, outputs: np.ndarray, targets: np.ndarray) -> None:
         """
@@ -59,6 +68,10 @@ class SoftmaxModel:
         assert self.grad.shape == self.w.shape,\
             f"Grad shape: {self.grad.shape}, w: {self.w.shape}"
 
+        error = targets- outputs
+        gradient = -X.T.dot(error) / X.shape[0] + self.l2_reg_lambda * self.w
+        self.grad = gradient
+
     def zero_grad(self) -> None:
         self.grad = None
 
@@ -71,8 +84,13 @@ def one_hot_encode(Y: np.ndarray, num_classes: int):
     Returns:
         Y: shape [Num examples, num classes]
     """
-    # TODO implement this function (Task 3a)
-    raise NotImplementedError
+    # DONE implement this function (Task 3a)
+    def getVector(i):
+        vector = np.zeros(num_classes)
+        vector[Y[i]] = 1
+        return vector
+
+    return np.array([getVector(i) for i in range(Y.shape[0])])
 
 
 def gradient_approximation_test(model: SoftmaxModel, X: np.ndarray, Y: np.ndarray):
