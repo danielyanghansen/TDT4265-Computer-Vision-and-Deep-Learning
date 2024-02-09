@@ -3,7 +3,7 @@ import utils
 
 np.random.seed(1)
 
-doLog = True
+doLog = False
 
 def logger(message: str, *args):
     if doLog:
@@ -104,7 +104,7 @@ class BinaryModel:
         logger("Error: ", error)
         logger("X: ", X)
         
-        self.grad = -np.dot(X.T, error) # X is transposed to get the correct dimensions for the dot product, as the gradient is a matrix with dimensions 785 * 1
+        self.grad = -np.dot(X.T, error)/ len(X) # X is transposed to get the correct dimensions for the dot product, as the gradient is a matrix with dimensions 785 * 1
 
         logger("Gradient after: ", self.grad)
         logger("Average Gradient:", np.mean(self.grad))
@@ -112,7 +112,6 @@ class BinaryModel:
         assert (
             targets.shape == outputs.shape
         ), f"Output shape: {outputs.shape}, targets: {targets.shape}"
-        self.grad = np.zeros_like(self.w)
         assert (
             self.grad.shape == self.w.shape
         ), f"Grad shape: {self.grad.shape}, w: {self.w.shape}"
