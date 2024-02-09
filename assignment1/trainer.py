@@ -92,12 +92,18 @@ class BaseTrainer:
                     # You can access the validation loss in val_history["loss"]
                     
                     # We stop if the validation loss is increasing for 10 steps
+
                     limit = 10
-                    if len(val_history["loss"]) > limit:
-                        last_10_losses = list(val_history["loss"].values())[-limit:]
-                        if all(last_10_losses[i] < last_10_losses[i+1] for i in range(limit-1)):
-                            print("Stopped in epoch", epoch)
-                            return train_history, val_history
+
+                    if global_step / num_steps_per_val > limit:
+                        current_check = val_history["loss"][global_step - limit * num_steps_per_val]
+                        
+                        for i in range(limit-1, -1, -1):
+                            if val_history["loss"][global_step - i * num_steps_per_val] < current_check:
+                                break
+                            if i == 0:
+                                print("Early stopping at epoch", epoch)
+                                return train_history, val_history
 
                 global_step += 1
         return train_history, val_history
