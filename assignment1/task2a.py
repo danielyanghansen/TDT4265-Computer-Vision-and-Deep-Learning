@@ -3,6 +3,12 @@ import utils
 
 np.random.seed(1)
 
+doLog = False
+
+def logger(message: str, *args):
+    if doLog:
+        print(message, *args)
+
 
 def pre_process_images(X: np.ndarray):
     """
@@ -18,7 +24,7 @@ def pre_process_images(X: np.ndarray):
     # Normalize the images to be in the range (-1,1)
     # This syntax works for numpy arrays and performs the operation element-wise
     X = (X / 127.5) - 1
-
+    
     # Add bias to the images
     bias_column = np.ones((X.shape[0], 1)) # Create a "matrix" with ones with dimensions batch size * 1
     X = np.concatenate((X, bias_column), axis=1) # Concatenate the bias column to the right of the images, resulting in a matrix with dimensions batch size * 785
@@ -57,7 +63,7 @@ class BinaryModel:
 
     def __init__(self):
         # Define number of input nodes
-        self.I = None
+        self.I = 785
         self.w = np.zeros((self.I, 1))
         self.grad = None
 
@@ -75,7 +81,7 @@ class BinaryModel:
         # Apply the sigmoid activation function
         y = 1 / (1 + np.exp(-z))
         # Remember that e^z is 1 + z + z^2/2! + z^3/3! + ...
-
+        logger("y:", y)
         return y
 
 
@@ -89,16 +95,23 @@ class BinaryModel:
         """
         # DONE implement this function (Task 2a)
 
+        logger("Gradient before: ", self.grad)
+
         # Gradient = -(y^n - \hat{y}^n) * x_i^n where n signifies the n-th sample in the batch and i signifies the i-th node in the input layer
         # You can note that the difference between the target (y) and the output (\hat{y}) is the error of the model
         # The error is then multiplied by the input to the model to get the gradient
         error = targets - outputs
-        self.grad = -np.dot(X.T, error) # X is transposed to get the correct dimensions for the dot product, as the gradient is a matrix with dimensions 785 * 1
+        logger("Error: ", error)
+        logger("X: ", X)
+        
+        self.grad = -np.dot(X.T, error)/ len(X) # X is transposed to get the correct dimensions for the dot product, as the gradient is a matrix with dimensions 785 * 1
+
+        logger("Gradient after: ", self.grad)
+        logger("Average Gradient:", np.mean(self.grad))
         
         assert (
             targets.shape == outputs.shape
         ), f"Output shape: {outputs.shape}, targets: {targets.shape}"
-        self.grad = np.zeros_like(self.w)
         assert (
             self.grad.shape == self.w.shape
         ), f"Grad shape: {self.grad.shape}, w: {self.w.shape}"
@@ -137,7 +150,6 @@ def gradient_approximation_test(model: BinaryModel, X: np.ndarray, Y: np.ndarray
             f"If this test fails there could be errors in your cross entropy loss function, "
             f"forward function or backward function"
         )
-
 
 def main():
     category1, category2 = 2, 3
