@@ -32,13 +32,25 @@ def cross_entropy_loss(targets: np.ndarray, outputs: np.ndarray) -> float:
         targets: labels/targets of each image of shape: [batch size, 1]
         outputs: outputs of model of shape: [batch size, 1]
     Returns:
-        Cross entropy error (float)
+        Average Cross entropy error over all targets and outputs (float)
     """
-    # TODO implement this function (Task 2a)
     assert (
         targets.shape == outputs.shape
     ), f"Targets shape: {targets.shape}, outputs: {outputs.shape}"
-    return 0
+    
+    # TODO implement this function (Task 2a)
+    # Singular Image Cross entropy loss function: - (y * log(\hat{y}) + (1 - y) * log(1 - \hat{y}))
+
+    # Average cross entropy loss for the batch: 1/N sum_{n=1}^{N} {Singular Image Cross entropy loss}_n
+    # where N is the batch size
+    # ... or simply the mean of the cross entropy loss for each image in the batch
+
+    average_loss = np.mean(
+        - (targets * np.log(outputs) + (1 - targets) * np.log(1 - outputs)) # This expressien resolves in a matrix with dimensions batch size * 1
+        # The loss function is applied element-wise to the targets and outputs
+    )
+
+    return average_loss
 
 
 class BinaryModel:
@@ -56,8 +68,16 @@ class BinaryModel:
         Returns:
             y: output of model with shape [batch size, 1]
         """
-        # TODO implement this function (Task 2a)
-        return None
+        # DONE implement this function (Task 2a)
+        weights = self.w
+        # Compute the weighted sum of inputs
+        z = np.dot(X, weights)
+        # Apply the sigmoid activation function
+        y = 1 / (1 + np.exp(-z))
+        # Remember that e^z is 1 + z + z^2/2! + z^3/3! + ...
+
+        return y
+
 
     def backward(self, X: np.ndarray, outputs: np.ndarray, targets: np.ndarray) -> None:
         """
@@ -67,7 +87,14 @@ class BinaryModel:
             outputs: outputs of model of shape: [batch size, 1]
             targets: labels/targets of each image of shape: [batch size, 1]
         """
-        # TODO implement this function (Task 2a)
+        # DONE implement this function (Task 2a)
+
+        # Gradient = -(y^n - \hat{y}^n) * x_i^n where n signifies the n-th sample in the batch and i signifies the i-th node in the input layer
+        # You can note that the difference between the target (y) and the output (\hat{y}) is the error of the model
+        # The error is then multiplied by the input to the model to get the gradient
+        error = targets - outputs
+        self.grad = -np.dot(X.T, error) # X is transposed to get the correct dimensions for the dot product, as the gradient is a matrix with dimensions 785 * 1
+        
         assert (
             targets.shape == outputs.shape
         ), f"Output shape: {outputs.shape}, targets: {targets.shape}"
