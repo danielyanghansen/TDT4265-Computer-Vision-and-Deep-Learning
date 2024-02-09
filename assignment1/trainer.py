@@ -96,14 +96,15 @@ class BaseTrainer:
                     limit = 10
 
                     if global_step / num_steps_per_val > limit:
-                        current_check = val_history["loss"][global_step - limit * num_steps_per_val]
-                        
-                        for i in range(limit-1, -1, -1):
-                            if val_history["loss"][global_step - i * num_steps_per_val] < current_check:
-                                break
-                            if i == 0:
-                                print("Early stopping at epoch", epoch)
-                                return train_history, val_history
+                        last_10_losses = [val_history["loss"][global_step - i * num_steps_per_val] for i in reversed(range(limit))]
+                        # [global_step - limit * num_steps_per_val, global_step - (limit - 1) * num_steps_per_val, ... , global_step - num_steps_per_val, global_step]
+
+                        # last 10 losses in order of increasing time
+
+                        increasingLoss = [last_10_losses[i] < last_10_losses[i+1] for i in range(9)]
+                        if all(increasingLoss):
+                            print("Early stopping at epoch", epoch)
+                            return train_history, val_history
 
                 global_step += 1
         return train_history, val_history
