@@ -23,8 +23,12 @@ def pre_process_images(X: np.ndarray):
     
     # Normalize the images to be in the range (-1,1)
     # This syntax works for numpy arrays and performs the operation element-wise
-    X = (X / 127.5) - 1
+   # X = (X / 127.5) - 1
 
+    for x in X:
+        val = (x / 127.5) - 1
+        logger("Internal Value: ", val)
+        x = val
     logger("Normalized X: ", X)
 
     # Add bias to the images
