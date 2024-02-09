@@ -16,8 +16,18 @@ def calculate_accuracy(X: np.ndarray, targets: np.ndarray, model: BinaryModel) -
         Accuracy (float)
     """
     # TODO Implement this function (Task 2c)
-    accuracy = 0.0
+
+    # Forward pass
+    logits = model.forward(X)
+
+    # The data is binary, looking at hand drawn images of 2 and 3
+    # We know from definition that the label 1 is for 2 and 0 is for 3
+    # We can therefore compare the logits to 0.5 to get the predicted label
+
+    accuracy = np.mean((logits >= 0.5) == targets) # If it's 50/50 we bias towards labeling it a 2
+    
     return accuracy
+
 
 
 class LogisticTrainer(BaseTrainer):
@@ -34,8 +44,17 @@ class LogisticTrainer(BaseTrainer):
         Returns:
             loss value (float) on batch
         """
-        # TODO: Implement this function (task 2b)
-        loss = 0
+        # DONE: Implement this function (task 2b)
+
+        # Forward pass
+        logits = self.model.forward(X_batch)
+
+        # Calculate average cross entropy loss over batch
+        loss = cross_entropy_loss(Y_batch, logits)
+
+        # Backward pass
+        self.model.backward(X_batch, logits, Y_batch)
+
         return loss
 
     def validation_step(self):
