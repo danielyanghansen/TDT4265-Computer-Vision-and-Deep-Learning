@@ -46,15 +46,14 @@ class LogisticTrainer(BaseTrainer):
         """
         # DONE: Implement this function (task 2b)
 
-        # Forward pass
         logits = self.model.forward(X_batch)
 
-        # Calculate average cross entropy loss over batch
-        loss = cross_entropy_loss(Y_batch, logits)
-
-        # Backward pass
+        # Set new gradient
         self.model.backward(X_batch, logits, Y_batch)
+        # Learn
+        self.model.w = self.model.w - self.learning_rate * self.model.grad
 
+        loss = cross_entropy_loss(Y_batch, logits)
         return loss
 
     def validation_step(self):
