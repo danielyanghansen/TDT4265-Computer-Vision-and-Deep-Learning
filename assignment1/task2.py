@@ -15,7 +15,7 @@ def calculate_accuracy(X: np.ndarray, targets: np.ndarray, model: BinaryModel) -
     Returns:
         Accuracy (float)
     """
-    # TODO Implement this function (Task 2c)
+    # DONE Implement this function (Task 2c)
 
     # Forward pass
     logits = model.forward(X)
